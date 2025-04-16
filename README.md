@@ -1,2 +1,2 @@
 # A1_Prog2
-2nd
+2nd programming assigment
