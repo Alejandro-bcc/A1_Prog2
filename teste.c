@@ -70,7 +70,7 @@ int main(){
 	fseek(arq_comp, 0, SEEK_SET);
 
 	buffer_in = (unsigned char *)malloc(arq_comp_tam);
-	buffer_out = (unsigned char *)malloc(arq_tam);
+	buffer_out = (unsigned char *)malloc(arq_tam* 2);
 
 	if(buffer_in == NULL || buffer_out == NULL){
 		printf("Erro ao alocar os buffers\n");
