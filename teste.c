@@ -26,8 +26,8 @@ int main(){
 	fseek(arq, 0, SEEK_END);
 	arq_tam = ftell(arq);
 
-	buffer_in = (unsigned char *)malloc(sizeof(arq_tam + 1));
-	buffer_out = (unsigned char *)malloc(sizeof(arq_tam * 2));
+	buffer_in = (unsigned char *)malloc(arq_tam + 1);
+	buffer_out = (unsigned char *)malloc(arq_tam * 2);
 
 	if(buffer_in == NULL || buffer_out == NULL){
 		printf("Erro ao alocar os buffers\n");
@@ -41,10 +41,11 @@ int main(){
 	fread(buffer_in, 1, arq_tam, arq);
 	buffer_in[arq_tam] = '\0';
 
+	/*  
 	LZ_Compress(buffer_in, buffer_out, arq_tam);
-	
-	fputs((char *)buffer_out, arq_comp);
-	
+  */
+	fputs((char *)buffer_in, arq_comp);
+
 	free(buffer_in);
 	free(buffer_out);
 	fclose(arq);
