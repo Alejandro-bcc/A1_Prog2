@@ -2,26 +2,45 @@
 #include <stdlib.h>
 #include "archive.h"
 
-unsigned char * arquivo_para_buffer(FILE *arq){
+unsigned int arquivo_para_buffer(FILE *arq, unsigned char *buffer){
 	
-	unsigned char *buffer;
 	unsigned int tam_arq;
 
 	if(arq == NULL)
-		return NULL;
+		return -1;
 
 	fseek(arq, 0, SEEK_END);
 	tam_arq = ftell(arq);
 	fseek(arq, 0, SEEK_SET);
+	
+	if(tam_arq == 0)
+		return -1;
 
-	buffer = (unsigned char *)malloc(tam);
+	buffer = (unsigned char *)malloc(tam_arq);
 
 	if(buffer == NULL){
 		free(buffer);
-		return NULL;
+		return -1;
 	}
 
-	fread(buffer, 1, tam_arq, arq);
+	if((fread(buffer, 1, tam_arq, arq)) != tam_arq){
+		free(buffer);
+		return -1;
+	}
 
-	return buffer;
+	return tam_arq;
+}
+
+int buffer_para_arquivo(unsigned char *buffer, unsigned int tam_arq, FILE *arq){
+
+	if(buffer == NULL || arq == NULL)
+		return -1;
+
+	if(tam_arq == 0)
+		return -1;
+
+	if((fwrite(buffer, 1, tam_arq, arq)) != tam_arq)
+		return -1;
+
+	return 0;
 }

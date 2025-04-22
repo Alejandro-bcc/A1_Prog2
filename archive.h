@@ -18,10 +18,12 @@ struct membro{
 	unsigned int data_mod;
 	unsigned int ordem;
 	unsigned int offset;
-	char *conteudo;
+	unsigned char *conteudo;
 	struct membro *prox;
 };
 
-char * arquivo_para_buffer(FILE *arq);
+unsigned int arquivo_para_buffer(FILE *arq, unsigned char *buffer);
+
+int buffer_para_arquivo(unsigned char *buffer, unsigned int tam_arq, FILE *arq);
 
 #endif
