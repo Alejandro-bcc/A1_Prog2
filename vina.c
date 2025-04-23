@@ -63,6 +63,11 @@ struct diretorio * cria_diretorio(){
 
 struct membro * cria_membro(FILE *arq){
 	
+	struct stat *info;
+
+	stat(arq, info);
+
+
 }
 
 int insere_membro(struct diretorio *d, struct membro *m){
