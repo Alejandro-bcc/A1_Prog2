@@ -22,8 +22,12 @@ struct membro{
 	struct membro *prox;
 };
 
-unsigned int arquivo_para_buffer(FILE *arq, unsigned char *buffer);
+unsigned int arquivo_para_buffer(FILE *arq, unsigned char **buffer);
 
 int buffer_para_arquivo(unsigned char *buffer, unsigned int tam_arq, FILE *arq);
+
+struct diretorio * cria_diretorio();
+
+int insere_membro(struct diretorio *d);
 
 #endif
