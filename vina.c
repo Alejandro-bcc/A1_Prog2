@@ -63,9 +63,19 @@ struct diretorio * cria_diretorio(){
 
 struct membro * cria_membro(FILE *arq){
 	
+	struct membro novo_m;
 	struct stat *info;
+	int f;
 
-	stat(arq, info);
+	novo_m = (struct membro *)malloc(sizeof(struct stat *));
+	info = (struct stat *)malloc(sizeof(struct stat *));
+	
+	if(info)
+		return NULL;
+	
+
+	f = fileno(arq);
+	fstat(f, info);
 
 
 }
