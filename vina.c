@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "archive.h"
+#include "diretorio.h"
 #include "manipulador_arquivos.h"
 
 void print_error(){
@@ -31,6 +32,7 @@ int main (int argc, char **argv){
 	char opcao;
 	char *archive_nome;
 	struct archive *arc;
+	int n_membros;
 
 	if(argc < 2){
 		printf("Argumentos insuficientes!\n");
@@ -54,31 +56,59 @@ int main (int argc, char **argv){
 	archive_nome = argv[2];
 	
 	arc = cria_archive(archive_nome);
-
-	if(tam_arq(arc->arq) != 0){
+	
+	if(printf("tamanho archive :%d\n", tam_arq(arc->arq)) > 4){
 		archive_inicializa(arc);
 	}
 
 	switch(opcao){
 		case 'p':
-			archive_insere(arc, argv[3]);
-			printf("Inserindo %s no %s\nConteudo:", argv[3], archive_nome);
-			print_cont_arq(arc->arq);
+			printf("Opcao -p:\n");
+
+			if(argv[3] == NULL){
+				printf("Argumentos insuficientes!\n");
+				print_error();
+				return -1;
+			}
+			for(int i = 3; i < argc; i++){
+				printf("Inserindo %s no %s sem comprimir\n", argv[i], archive_nome);
+				if(archive_insere(arc, argv[i]) < 0){
+					printf("Erro ao inserir! Abortando...\n");
+					return -1;
+				}
+				printf("Inserção feita com sucesso!\n");
+			}
 			break;
 		case 'i':
-			printf("Opcao i\n");
+			printf("Opcao -i:\n");
 			break;
 		case 'm':
-			printf("Opcao m\n");
+			printf("Opcao -m:\n");
 			break;
 		case 'x':
-			printf("Opcao x\n");
+			printf("Opcao -x:\n");
 			break;
 		case 'r':
-			printf("Opcao r\n");
+			printf("Opcao -r:\n");
 			break;
 		case 'c':
-			printf("Opcao c\n");
+			printf("Opcao -c:\nListando conteúdo do archive:\n");
+
+			n_membros = archive_print_cont(arc);
+			if(n_membros == 0){
+				printf("Número de membros igual a zero! Abortando...\n");
+			}else if(n_membros < 0){
+				printf("Número de membros inválido! Abortando...\n");
+			}else{
+				printf("Nome			");
+				printf("UDI				");
+				printf("Tam. Orig.		");
+				printf("Tam. Disc.		");
+				printf("Data Mod.		");
+				printf("Ordem\n");
+			}
+
+				
 			break;
 		default:
 			printf("Insira uma opção válida!\n");

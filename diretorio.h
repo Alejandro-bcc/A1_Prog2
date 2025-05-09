@@ -1,16 +1,17 @@
 #ifndef DIRETORIO
 #define DIRETORIO
 
+#include <time.h>
+
 struct membro{
 
     const char *nome;
     unsigned int udi;
     unsigned int tam_orig;
     unsigned int tam_comp;
-    unsigned int data_mod;
+    time_t data_mod;
     unsigned int ordem;
     unsigned int offset;
-    unsigned char *conteudo;
     struct membro *prox;
 	struct membro *ant;
 };
@@ -29,5 +30,7 @@ struct diretorio * cria_diretorio();
 void destroi_diretorio(struct diretorio *dir);
 
 int diretorio_insere(struct diretorio *d, struct membro *m);
+
+void diretorio_imprime(struct diretorio *d); 
 
 #endif

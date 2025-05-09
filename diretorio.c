@@ -30,7 +30,6 @@ struct membro * cria_membro(const char *nome){
 	novo_m->data_mod = info.st_mtime;
 	novo_m->ordem = 0;
 	novo_m->offset = 0;
-	novo_m->conteudo = NULL;
 	novo_m->prox = NULL;
 	novo_m->ant = NULL;
 
@@ -63,16 +62,8 @@ void destroi_diretorio(struct diretorio *dir){
 	while(dir->prim != NULL){
 		aux = dir->prim;
 		dir->prim = aux->prox;
-
-		if(aux->conteudo != NULL){
-			free(aux->conteudo);
-			aux->conteudo = NULL;
-		}
-
-		if(aux != NULL){
-			free(aux);
-			aux = NULL;
-		}
+		free(aux);
+		aux = NULL;
 	}
 
 	free(dir);
@@ -94,12 +85,36 @@ int diretorio_insere(struct diretorio *d, struct membro *m){
 
 	if(d->prim == NULL){
 		d->prim = m;
-		d->ult = m;
-	}else{
+		d->ult = m;	
+		m->prox = NULL;
+		m->ant = NULL;
+
+		return ++d->tam;
+	}
+		m->prox = NULL;
+		m->ant = d->ult;
 		d->ult->prox = m;
 		d->ult = m;
-	}
+	
 
-	d->tam++;
-	return d->tam;
-} 
+	return ++d->tam;
+}
+
+void diretorio_imprime(struct diretorio *d){
+	
+	struct membro *aux;
+
+	if(d == NULL)
+		return;
+
+	aux = d->prim;
+	while(aux != NULL){
+		printf("%s 		", aux->nome);
+		printf("%d		", aux->udi);
+		printf("%d		", aux->tam_orig);
+		printf("%d		", aux->tam_comp);
+ 		printf("%s		", asctime(gmtime(&aux->data_mod)));
+		printf("%d\n", aux->ordem);
+		aux = aux->prox;
+	}
+}
