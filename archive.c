@@ -63,7 +63,16 @@ void destroi_diretorio(struct diretorio *dir){
 	while(dir->prim != NULL){
 		aux = dir->prim;
 		dir->prim = aux->prox;
-		free(aux);
+
+		if(aux->conteudo != NULL){
+			free(aux->conteudo);
+			aux->conteudo = NULL;
+		}
+
+		if(aux != NULL){
+			free(aux);
+			aux = NULL;
+		}
 	}
 
 	free(dir);
@@ -71,20 +80,27 @@ void destroi_diretorio(struct diretorio *dir){
    
 int insere_diretorio(struct diretorio *d, struct membro *m){
 	
+	struct membro *atual;
+
 	if(d == NULL || m == NULL)
 		return -1;
 	
+	atual = d->prim;
+	while(atual != NULL){
+		if(atual == m)
+			return -1;
+		atual = atual->prox;
+	}
+
 	if(d->prim == NULL){
 		d->prim = m;
 		d->ult = m;
-
+	}else{
+		d->ult->prox = m;
+		d->ult = m;
 	}
 
-	d->ult->prox = m;
-	d->ult = m;
-
 	d->tam++;
-
 	return d->tam;
 }  
 

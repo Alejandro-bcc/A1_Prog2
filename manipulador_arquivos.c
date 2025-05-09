@@ -3,49 +3,6 @@
 
 #include "manipulador_arquivos.h"
 
-int arq_to_buffer(FILE *arq, unsigned char **buffer){
-
-   unsigned int tam_arq;
-
-   if(arq == NULL)
-       return -1;
-
-   fseek(arq, 0, SEEK_END);
-   tam_arq = ftell(arq);
-   fseek(arq, 0, SEEK_SET);
-
-   if(tam_arq == 0)
-       return -1;
-
-   *buffer = (unsigned char *)malloc(tam_arq);
-
-   if(*buffer == NULL){
-       return -1;
-   }
-
-   if((fread(*buffer, 1, tam_arq, arq)) != tam_arq){
-       free(*buffer);
-       *buffer = NULL;
-       return -1;
-   }
-
-   return tam_arq;
-}
-
-int buffer_to_arq(unsigned char *buffer, unsigned int tam_arq, FILE *arq){
-
-    if(buffer == NULL || arq == NULL)
-        return -1;
-
-    if(tam_arq == 0)
-        return -1;
-
-    if((fwrite(buffer, 1, tam_arq, arq)) != tam_arq)
-        return -1;
-
-    return 0;
-}
-
 unsigned int tam_arq(FILE *arq){
 	
 	int tamanho;
@@ -74,3 +31,54 @@ void print_cont_arq(FILE *arq){
 		free(buff);
 	}
 }
+
+int arq_to_buffer(FILE *arq, unsigned char **buffer){
+
+	unsigned int tam_arq;
+
+	if(arq == NULL)
+		return -1;
+
+	fseek(arq, 0, SEEK_END);
+	tam_arq = ftell(arq);
+	fseek(arq, 0, SEEK_SET);
+
+	if(tam_arq == 0)
+		return -1;
+
+	*buffer = (unsigned char *)malloc(tam_arq);
+
+	if(*buffer == NULL)
+		return -1;
+
+
+	if((fread(*buffer, 1, tam_arq, arq)) != tam_arq){
+		free(*buffer);
+		*buffer = NULL;
+		return -1;
+	}	
+	
+	print_cont_arq(arq);
+	printf("%s\n", *buffer);
+
+	free(buffer);
+	*buffer = NULL;
+
+	return tam_arq;
+}
+
+int buffer_to_arq(unsigned char *buffer, unsigned int tam_arq, FILE *arq){
+
+    if(buffer == NULL || arq == NULL)
+        return -1;
+
+    if(tam_arq == 0)
+        return -1;
+
+    if((fwrite(buffer, 1, tam_arq, arq)) != tam_arq)
+        return -1;
+
+    return 0;
+}
+
+
