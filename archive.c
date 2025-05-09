@@ -68,11 +68,26 @@ void destroi_diretorio(struct diretorio *dir){
 
 	free(dir);
 }
-/*   
-int insere_membro(struct diretorio *d, struct membro *m){
+   
+int insere_diretorio(struct diretorio *d, struct membro *m){
+	
+	if(d == NULL || m == NULL)
+		return -1;
+	
+	if(d->prim == NULL){
+		d->prim = m;
+		d->ult = m;
 
+	}
+
+	d->ult->prox = m;
+	d->ult = m;
+
+	d->tam++;
+
+	return d->tam;
 }  
- */
+
 int inicializa_archive(struct archive *arc){
 
 	int n_membros = 0;
@@ -104,6 +119,7 @@ int insere_archive(struct archive *arc, const char *nome){
 	fseek(arc->arq, 0 , SEEK_END);
 	fwrite(novo_m->conteudo, tam_conteudo, 1, arc->arq);
 	fseek(arc->arq, 0, SEEK_SET);
+	insere_diretorio(arc->dir, novo_m);
 
 	return 0;
 }

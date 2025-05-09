@@ -64,6 +64,8 @@ int main (int argc, char **argv){
 	switch(opcao){
 		case 'p':
 			insere_archive(arc, argv[3]);
+			printf("Inserindo %s no %s\nConteudo:", argv[3], archive_nome);
+			print_cont_arq(arc->arq);
 			break;
 		case 'i':
 			printf("Opcao i\n");
