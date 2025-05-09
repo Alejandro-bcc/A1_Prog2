@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "archive.h"
+#include "manipulador_arquivos.h"
 
 void print_error(){
 	
@@ -56,6 +57,7 @@ int main (int argc, char **argv){
 	arc->arq = fopen(archive_nome, "w+");
 	arc->dir = cria_diretorio();
 	
+	print_cont_arq(arc->arq);
 
 	switch(opcao){
 		case 'p':

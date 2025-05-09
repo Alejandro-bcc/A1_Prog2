@@ -4,19 +4,29 @@
 
 #include "archive.h"
 
-struct membro * cria_membro(FILE *arq){
+struct membro * cria_membro(const char *nome){
 
 	struct membro *novo_m;
-	struct stat *info;
+	struct stat info;
 
 	novo_m = (struct membro *)malloc(sizeof(struct membro));
-	info = (struct stat *)malloc(sizeof(struct stat *));
 
-	if(info)//?
+	if(novo_m == NULL)
 		return NULL;
-	fstat(arq, info);
-	free(info);
 
+	if(stat(nome, &info) == -1){
+		free(novo_m);
+		return NULL;
+	}
+	
+	novo_m->nome = nome;
+	novo_m->udi = info.st_uid;
+	novo_m->tam_orig = info.st_size;
+	novo_m->tam_comp = 0;
+	novo_m->data_mod = info.st_mtime;
+	novo_m->ordem = 0;
+	novo_m->offset = 0;
+	novo_m->conteudo = NULL;
 	novo_m->prox = NULL;
 	novo_m->ant = NULL;
 

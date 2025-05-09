@@ -5,7 +5,7 @@
 
 struct membro{
 
-    char nome[MAX_STR_LEN];
+    const char *nome;
     unsigned int udi;
     unsigned int tam_orig;
     unsigned int tam_comp;
@@ -30,7 +30,7 @@ struct archive{
 	struct diretorio *dir;
 };
 
-struct membro * cria_membro(FILE *arq);
+struct membro * cria_membro(const char *nome);
 
 struct diretorio * cria_diretorio();
 

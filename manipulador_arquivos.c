@@ -3,7 +3,7 @@
 
 #include "manipulador_arquivos.h"
 
-int arquivo_para_buffer(FILE *arq, unsigned char **buffer){
+int arq_to_buffer(FILE *arq, unsigned char **buffer){
 
    unsigned int tam_arq;
 
@@ -32,7 +32,7 @@ int arquivo_para_buffer(FILE *arq, unsigned char **buffer){
    return tam_arq;
 }
 
-int buffer_para_arquivo(unsigned char *buffer, unsigned int tam_arq, FILE *arq){
+int buffer_to_arq(unsigned char *buffer, unsigned int tam_arq, FILE *arq){
 
     if(buffer == NULL || arq == NULL)
         return -1;
@@ -44,4 +44,12 @@ int buffer_para_arquivo(unsigned char *buffer, unsigned int tam_arq, FILE *arq){
         return -1;
 
     return 0;
+}
+
+void print_cont_arq(FILE *arq){
+	
+	unsigned char *buff; 
+	arq_to_buffer(arq, &buff);
+	
+	printf("%s\n", buff);
 }
