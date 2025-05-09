@@ -6,20 +6,19 @@
 
 struct membro * cria_membro(FILE *arq){
 
-	struct membro novo_m;
+	struct membro *novo_m;
 	struct stat *info;
-	int f;
 
-	novo_m = (struct membro *)malloc(sizeof(struct stat *));
+	novo_m = (struct membro *)malloc(sizeof(struct membro));
 	info = (struct stat *)malloc(sizeof(struct stat *));
 
 	if(info)//?
 		return NULL;
-
+	fstat(arq, info);
 	free(info);
 
-	novo->prox = NULL;
-	novo->ant = NULL;
+	novo_m->prox = NULL;
+	novo_m->ant = NULL;
 
 	return novo_m;
 }
@@ -35,7 +34,7 @@ struct diretorio * cria_diretorio(){
 
 	novo_d->prim = NULL;
 	novo_d->ult = NULL;
-	novo_d->n_membros = 0;
+	novo_d->tam = 0;
 
 	return novo_d;
 }

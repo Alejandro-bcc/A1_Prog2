@@ -29,7 +29,7 @@ int main (int argc, char **argv){
 	
 	char opcao;
 	char *archive_nome;
-	struct archive arc;
+	struct archive *arc;
 
 	if(argc < 2){
 		printf("Argumentos insuficientes!\n");
@@ -51,7 +51,8 @@ int main (int argc, char **argv){
 
 	opcao = argv[1][1];
 	archive_nome = argv[2];
-
+	
+	arc = (struct archive *)malloc(sizeof(struct archive));
 	arc->arq = fopen(archive_nome, "w+");
 	arc->dir = cria_diretorio();
 	
@@ -78,10 +79,10 @@ int main (int argc, char **argv){
 		default:
 			printf("Insira uma opção válida!\n");
 			print_error();
-			break;
 	}
 
 	destroi_diretorio(arc->dir);
-	fclose(arc->arquivo);
+	fclose(arc->arq);
+	free(arc);
 	return 0;
 }

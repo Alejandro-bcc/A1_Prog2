@@ -28,7 +28,7 @@ struct archive{
 	
 	FILE *arq;
 	struct diretorio *dir;
-}
+};
 
 struct membro * cria_membro(FILE *arq);
 
