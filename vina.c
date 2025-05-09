@@ -53,17 +53,15 @@ int main (int argc, char **argv){
 	opcao = argv[1][1];
 	archive_nome = argv[2];
 	
-	arc = (struct archive *)malloc(sizeof(struct archive));
-	arc->arq = fopen(archive_nome, "a+");
-	arc->dir = cria_diretorio();
+	arc = cria_archive(archive_nome);
 
 	if(tam_arq(arc->arq) != 0){
-		inicializa_archive(arc);
+		archive_inicializa(arc);
 	}
 
 	switch(opcao){
 		case 'p':
-			insere_archive(arc, argv[3]);
+			archive_insere(arc, argv[3]);
 			printf("Inserindo %s no %s\nConteudo:", argv[3], archive_nome);
 			print_cont_arq(arc->arq);
 			break;

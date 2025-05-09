@@ -58,11 +58,7 @@ int arq_to_buffer(FILE *arq, unsigned char **buffer){
 		return -1;
 	}	
 	
-	print_cont_arq(arq);
 	printf("%s\n", *buffer);
-
-	free(buffer);
-	*buffer = NULL;
 
 	return tam_arq;
 }

@@ -3,7 +3,7 @@
 
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -g -std=c99 -g
-OBJS = vina.o archive.o manipulador_arquivos.o
+OBJS = vina.o archive.o diretorio.o manipulador_arquivos.o
 
 # gera executavel
 all: $(OBJS)
@@ -17,6 +17,9 @@ vina.o: vina.c archive.h
 
 archive.o: archive.c archive.h
 	$(CC) $(CFLAGS) -c archive.c
+
+diretorio.o: diretorio.c diretorio.h
+	$(CC) $(CFLAGS) -c diretorio.c
 
 manipulador_arquivos.o: manipulador_arquivos.c manipulador_arquivos.h
 	$(CC) $(CFLAGS) -c manipulador_arquivos.c
