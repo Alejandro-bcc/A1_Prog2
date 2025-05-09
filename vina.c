@@ -1,106 +1,87 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/stat.h>
-#include "vina.h"
 
-unsigned int arquivo_para_buffer(FILE *arq, unsigned char **buffer){
+#include "archive.h"
+
+void print_error(){
 	
-	unsigned int tam_arq;
+	printf("\n");
+	printf("Formato adequado:\n\n");
 
-	if(arq == NULL)
-		return -1;
-
-	fseek(arq, 0, SEEK_END);
-	tam_arq = ftell(arq);
-	fseek(arq, 0, SEEK_SET);
+	printf("vinac <opção> <archive> [membro1 membro2 ...]\n\n");
 	
-	if(tam_arq == 0)
-		return -1;
+	printf("Opções:\n");
 
-	*buffer = (unsigned char *)malloc(tam_arq);
+	printf("-p : insere/acrescenta um ou mais membros sem compressão ao archive. Caso o membro já exista no archive, ele deve ser substituído. Novos membros são inseridos respeitando a ordem da linha de comando, ao final do archive;\n\n");
 
-	if(*buffer == NULL){
-		return -1;
-	}
+	printf("-i) : insere/acrescenta um ou mais membros com compressão ao archive. Caso o membro já exista no archive, ele deve ser substituído. Novos membros são inseridos respeitando a ordem da linha de comando, ao final do archive;\n\n");
 
-	if((fread(*buffer, 1, tam_arq, arq)) != tam_arq){
-		free(*buffer);
-		*buffer = NULL;
-		return -1;
-	}
+	printf("-m membro : move o membro indicado na linha de comando para imediatamente depois do membro target existente em archive. A movimentação deve ocorrer na seção de dados do archive; para mover para o início, o target deve ser NULL.\n\n");
 
-	return tam_arq;
+	printf("-x : extrai os membros indicados de archive. Se os membros não forem indicados, todos devem ser extraídos. A extração consiste em ler o membro de archive e criar um arquivo correspondente, com conteúdo idêntico, em disco;\n\n");
+
+	printf("-r : remove os membros indicados de archive;\n\n");
+
+	printf("-c : lista o conteúdo de archive em ordem, incluindo as propriedades de cada membro (nome, UID, tamanho original, tamanho em disco e data de modificação) e sua ordem no arquivo.\n\n");
 }
 
-int buffer_para_arquivo(unsigned char *buffer, unsigned int tam_arq, FILE *arq){
+int main (int argc, char **argv){
+	
+	char opcao;
+	char *archive_nome;
+	struct archive arc;
 
-	if(buffer == NULL || arq == NULL)
-		return -1;
+	if(argc < 2){
+		printf("Argumentos insuficientes!\n");
+		print_error();
+		return 1;
+	}
 
-	if(tam_arq == 0)
-		return -1;
+	if(argv[1][0] != '-'){
+		printf("Insira uma opção válida com '-'!\n");
+		print_error();
+		return 1;
+	}
 
-	if((fwrite(buffer, 1, tam_arq, arq)) != tam_arq)
-		return -1;
+	if(argv[2] == NULL){
+		printf("Insira o nome do archive!\n");	
+		print_error();
+		return 1;
+	}
 
+	opcao = argv[1][1];
+	archive_nome = argv[2];
+
+	arc->arq = fopen(archive_nome, "w+");
+	arc->dir = cria_diretorio();
+	
+
+	switch(opcao){
+		case 'p':
+			printf("Opcao p\n");
+			break;
+		case 'i':
+			printf("Opcao i\n");
+			break;
+		case 'm':
+			printf("Opcao m\n");
+			break;
+		case 'x':
+			printf("Opcao x\n");
+			break;
+		case 'r':
+			printf("Opcao r\n");
+			break;
+		case 'c':
+			printf("Opcao c\n");
+			break;
+		default:
+			printf("Insira uma opção válida!\n");
+			print_error();
+			break;
+	}
+
+	destroi_diretorio(arc->dir);
+	fclose(arc->arquivo);
 	return 0;
 }
-
-struct diretorio * cria_diretorio(){
-
-	struct diretorio *novo_d;
-
-	novo_d = (struct diretorio *)malloc(sizeof(struct diretorio));
-
-	if(!novo_d)
-		return NULL;
-
-	novo_d->prim = NULL;
-	novo_d->n_membros = 0;
-
-	return novo_d;
-}
-
-struct membro * cria_membro(FILE *arq){
-	
-	struct membro novo_m;
-	struct stat *info;
-	int f;
-
-	novo_m = (struct membro *)malloc(sizeof(struct stat *));
-	info = (struct stat *)malloc(sizeof(struct stat *));
-	
-	if(info)
-		return NULL;
-	
-
-	f = fileno(arq);
-	fstat(f, info);
-
-
-}
-
-int insere_membro(struct diretorio *d, struct membro *m){
-	
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

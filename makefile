@@ -5,22 +5,18 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror -g -std=c99 -g
 
 # gera executavel
-all: teste
+all: vina.o archive.o
+	$(CC) $(CFLAGS) vina.c -o vina archive.o
 
-teste: teste.o lz/lz.o vina.o
-	$(CC) $(CFLAGS) -o teste teste.o lz/lz.o vina.o
+#lz/lz.o: lz/lz.c lz/lz.h
+#	$(CC) $(CFLAGS) -c lz/lz.c -o lz/lz.o
 
-teste.o: teste.c lz/lz.h
-	$(CC) $(CFLAGS) -c teste.c
-
-lz/lz.o: lz/lz.c lz/lz.h
-	$(CC) $(CFLAGS) -c lz/lz.c -o lz/lz.o
-
-vina.o: vina.c vina.h
-	$(CC) $(CFLAGS) -c vina.c -o vina.o
+archive.o: archive.c archive.h
+	$(CC) -c $(CFLAGS) archive.c
 
 valgrind: teste
-	valgrind --leak-check=full --track-origins=yes ./teste
+	valgrind --leak-check=full --track-origins=yes ./vina
 
 clean:
-	rm -f *.o *~ teste
+	rm -f *.o *~ vina
+
