@@ -46,10 +46,31 @@ int buffer_to_arq(unsigned char *buffer, unsigned int tam_arq, FILE *arq){
     return 0;
 }
 
+unsigned int tam_arq(FILE *arq){
+	
+	int tamanho;
+
+	if(arq == NULL)
+		return 0;
+	
+	fseek(arq, 0, SEEK_END);
+	tamanho = ftell(arq);
+	fseek(arq, 0, SEEK_SET);
+
+	return tamanho;
+}
+
 void print_cont_arq(FILE *arq){
 	
 	unsigned char *buff; 
+	if(arq == NULL){
+		printf("arq null\n");
+		return;
+	}
 	arq_to_buffer(arq, &buff);
 	
-	printf("%s\n", buff);
+	if(buff != NULL){
+		printf("%s\n", buff);
+		free(buff);
+	}
 }

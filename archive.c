@@ -3,6 +3,10 @@
 #include <sys/stat.h>
 
 #include "archive.h"
+#include "manipulador_arquivos.h"
+
+#define TAM_N_MEMBROS sizeof(int)
+#define TAM_METADADOS sizeof(struct membro)
 
 struct membro * cria_membro(const char *nome){
 
@@ -67,5 +71,43 @@ void destroi_diretorio(struct diretorio *dir){
 /*   
 int insere_membro(struct diretorio *d, struct membro *m){
 
-}  */
+}  
+ */
+int inicializa_archive(struct archive *arc){
+
+	int n_membros = 0;
+
+	if(arc == NULL)
+		return -1;
+	
+	fseek(arc->arq, 0, SEEK_SET);
+	fwrite(&n_membros, TAM_N_MEMBROS, 1, arc->arq);
+	return 0;
+}
+  
+int insere_archive(struct archive *arc, const char *nome){
+
+	struct membro *novo_m;
+	int tam_conteudo;
+
+	if(arc == NULL || nome == NULL)
+		return -1;
+
+	novo_m = cria_membro(nome);
+
+	if(novo_m == NULL)
+		return -1;
+	
+	fseek(arc->arq, 0 , SEEK_END);
+	fwrite(novo_m, TAM_METADADOS, 1, arc->arq);
+	tam_conteudo = arq_to_buffer(arc->arq, &novo_m->conteudo);
+	fseek(arc->arq, 0 , SEEK_END);
+	fwrite(novo_m->conteudo, tam_conteudo, 1, arc->arq);
+	fseek(arc->arq, 0, SEEK_SET);
+
+	return 0;
+}
+
+
+
 

@@ -54,14 +54,16 @@ int main (int argc, char **argv){
 	archive_nome = argv[2];
 	
 	arc = (struct archive *)malloc(sizeof(struct archive));
-	arc->arq = fopen(archive_nome, "w+");
+	arc->arq = fopen(archive_nome, "a+");
 	arc->dir = cria_diretorio();
-	
-	print_cont_arq(arc->arq);
+
+	if(tam_arq(arc->arq) != 0){
+		inicializa_archive(arc);
+	}
 
 	switch(opcao){
 		case 'p':
-			printf("Opcao p\n");
+			insere_archive(arc, argv[3]);
 			break;
 		case 'i':
 			printf("Opcao i\n");

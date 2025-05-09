@@ -38,4 +38,9 @@ void destroi_diretorio(struct diretorio *dir);
 
 int insere_membro(struct diretorio *d, struct membro *m);
 
+int insere_archive(struct archive *arc, const char *nome);
+
+int inicializa_archive(struct archive *arc);
+
+
 #endif
