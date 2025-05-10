@@ -23,7 +23,6 @@ struct archive * cria_archive(const char *archive_nome){
 	}
 	
 	arc->dir = cria_diretorio();
-	arc->n_membros = 0;
 
 	return arc;
 }
@@ -45,21 +44,22 @@ int archive_inicializa(struct archive *arc){
 	}
 
 	fread(&n_membros_inicial, TAM_N_MEMBROS, 1, arc->arq);
-	printf("1: Archive originalmente com %d membros\n", n_membros_inicial);
-
-	for(int i = 0; i <= n_membros_inicial; i++){
-		fread(&atual, TAM_PROPRIEDADES, 1, arc->arq);
-		diretorio_insere(arc->dir, &atual);
-		arc->n_membros++;
+	if(n_membros_inicial == 0){
+		printf("Archive originalmente vazio!\n");
+		return n_membros_inicial;
 	}
 
-	printf("2: Archive originalmente com %d membros\n", arc->n_membros);
-	printf("3: Archive originalmente com %d membros\n", arc->dir->tam);
+	printf("1: Archive originalmente com %d membros\n", n_membros_inicial);
+
+	for(int i = 0; i < n_membros_inicial; i++){
+		fread(&atual, TAM_PROPRIEDADES, 1, arc->arq);
+		diretorio_insere(arc->dir, &atual);
+	}
+
+	printf("2: Archive originalmente com %d membros\n", arc->dir->tam);
 
 	fseek(arc->arq, 0, SEEK_SET);
-	fwrite(&arc->n_membros, TAM_N_MEMBROS, 1, arc->arq);
 	
-	printf("n membros %d\n", arc->n_membros);
 	return n_membros_inicial;
 }
   
@@ -68,7 +68,7 @@ int archive_insere(struct archive *arc, const char *membro_nome){
 	struct membro *novo_m;
 	FILE *membro_arq;
 	unsigned char *buffer;
-	int tam_conteudo;
+	int tam_conteudo, n_membros;
 
 	if(arc == NULL || membro_nome == NULL)
 		return -1;
@@ -83,13 +83,15 @@ int archive_insere(struct archive *arc, const char *membro_nome){
 		return -1;
 	}
 
-	fseek(arc->arq, 0 , SEEK_END);
+	n_membros = diretorio_insere(arc->dir, novo_m);
+
+	fseek(arc->arq, 0, SEEK_SET);
+	fwrite(&n_membros, TAM_N_MEMBROS, 1, arc->arq);
 	fwrite(novo_m, TAM_PROPRIEDADES, 1, arc->arq);
 	tam_conteudo = arq_to_buffer(membro_arq, &buffer);
 	fseek(arc->arq, 0 , SEEK_END);
 	fwrite(buffer, tam_conteudo, 1, arc->arq);
 	fseek(arc->arq, 0, SEEK_SET);
-	diretorio_insere(arc->dir, novo_m);
 
 	free(buffer);
 	fclose(membro_arq);
@@ -102,10 +104,13 @@ int archive_print_cont(struct archive *arc){
 
 	if(arc == NULL)
 		return -1;
+	
+	if(arc->dir->tam == 0){
+		printf("Archive vazio! Nada para listar\n");
+		return -1;
+	}
+
 	fread(&n_membros, TAM_N_MEMBROS, 1, arc->arq);
-	printf("n_membros: %d\n", n_membros);
-	printf("arc->dir->tam: %d\n", arc->dir->tam);
-	printf("arc->n_membros: %d\n", arc->n_membros);
 	if(n_membros <= 0)
 		return n_membros;
 	

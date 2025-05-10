@@ -7,7 +7,6 @@ struct archive{
 	
 	FILE *arq;
 	struct diretorio *dir;
-	unsigned int n_membros;
 };
 
 struct archive * cria_archive(const char *archive_nome);
