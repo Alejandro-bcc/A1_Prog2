@@ -57,9 +57,7 @@ int main (int argc, char **argv){
 	
 	arc = cria_archive(archive_nome);
 	
-	if(printf("tamanho archive :%d\n", tam_arq(arc->arq)) > 4){
-		archive_inicializa(arc);
-	}
+	archive_inicializa(arc);
 
 	switch(opcao){
 		case 'p':

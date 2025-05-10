@@ -13,7 +13,6 @@
 struct archive * cria_archive(const char *archive_nome){
 	
 	struct archive *arc;
-	int tam_inicial = 0;
 
 	arc = (struct archive *)malloc(sizeof(struct archive));
 	arc->arq = fopen(archive_nome, "a+");
@@ -23,9 +22,6 @@ struct archive * cria_archive(const char *archive_nome){
 		return NULL;
 	}
 	
-	fseek(arc->arq, 0, SEEK_SET);
-	fwrite(&tam_inicial, TAM_N_MEMBROS, 1, arc->arq);
-
 	arc->dir = cria_diretorio();
 	arc->n_membros = 0;
 
@@ -34,20 +30,31 @@ struct archive * cria_archive(const char *archive_nome){
  
 int archive_inicializa(struct archive *arc){
 
-	struct membro *atual;
+	struct membro atual;
 	int n_membros_inicial = 0;
 
 	if(arc == NULL)
 		return -1;
 	
 	fseek(arc->arq, 0, SEEK_SET);
-	fread(&n_membros_inicial, TAM_N_MEMBROS, 1, arc->arq);
 
-	for(int i = 0; i < n_membros_inicial; i++){
+	if(tam_arq(arc->arq) == 0){
+		printf("Archive originalmente vazio!\n");
+		fwrite(&n_membros_inicial, TAM_N_MEMBROS, 1, arc->arq);
+		return n_membros_inicial;
+	}
+
+	fread(&n_membros_inicial, TAM_N_MEMBROS, 1, arc->arq);
+	printf("1: Archive originalmente com %d membros\n", n_membros_inicial);
+
+	for(int i = 0; i <= n_membros_inicial; i++){
 		fread(&atual, TAM_PROPRIEDADES, 1, arc->arq);
-		diretorio_insere(arc->dir, atual);
+		diretorio_insere(arc->dir, &atual);
 		arc->n_membros++;
 	}
+
+	printf("2: Archive originalmente com %d membros\n", arc->n_membros);
+	printf("3: Archive originalmente com %d membros\n", arc->dir->tam);
 
 	fseek(arc->arq, 0, SEEK_SET);
 	fwrite(&arc->n_membros, TAM_N_MEMBROS, 1, arc->arq);
@@ -96,7 +103,9 @@ int archive_print_cont(struct archive *arc){
 	if(arc == NULL)
 		return -1;
 	fread(&n_membros, TAM_N_MEMBROS, 1, arc->arq);
-	printf("num arqs: %d\n", n_membros);
+	printf("n_membros: %d\n", n_membros);
+	printf("arc->dir->tam: %d\n", arc->dir->tam);
+	printf("arc->n_membros: %d\n", arc->n_membros);
 	if(n_membros <= 0)
 		return n_membros;
 	

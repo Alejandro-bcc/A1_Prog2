@@ -3,12 +3,12 @@
 
 #include "manipulador_arquivos.h"
 
-unsigned int tam_arq(FILE *arq){
+int tam_arq(FILE *arq){
 	
 	int tamanho;
 
 	if(arq == NULL)
-		return 0;
+		return -1;
 	
 	fseek(arq, 0, SEEK_END);
 	tamanho = ftell(arq);
