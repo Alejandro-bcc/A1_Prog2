@@ -84,7 +84,7 @@ int archive_insere(struct archive *arc, const char *membro_nome){
 	}
 
 	n_membros = diretorio_insere(arc->dir, novo_m);
-
+	printf("numero de membros apos inserção: %d\n", n_membros);
 	fseek(arc->arq, 0, SEEK_SET);
 	fwrite(&n_membros, TAM_N_MEMBROS, 1, arc->arq);
 	fwrite(novo_m, TAM_PROPRIEDADES, 1, arc->arq);
