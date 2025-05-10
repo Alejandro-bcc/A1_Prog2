@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 
 #include "diretorio.h"
@@ -23,7 +24,7 @@ struct membro * cria_membro(const char *nome){
 		return NULL;
 	}
 	
-	novo_m->nome = nome;
+	strcpy(novo_m->nome, nome);
 	novo_m->udi = info.st_uid;
 	novo_m->tam_orig = info.st_size;
 	novo_m->tam_comp = 0;

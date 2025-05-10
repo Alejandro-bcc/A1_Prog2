@@ -36,7 +36,6 @@ int archive_inicializa(struct archive *arc){
 		return -1;
 	
 	fseek(arc->arq, 0, SEEK_SET);
-
 	if(tam_arq(arc->arq) == 0){
 		printf("Archive originalmente vazio!\n");
 		fwrite(&n_membros_inicial, TAM_N_MEMBROS, 1, arc->arq);
@@ -84,8 +83,11 @@ int archive_insere(struct archive *arc, const char *membro_nome){
 	}
 
 	n_membros = diretorio_insere(arc->dir, novo_m);
+
 	printf("numero de membros apos inserção: %d\n", n_membros);
-	fseek(arc->arq, 0, SEEK_SET);
+	fseek(arc->arq, 0, SEEK_SET);	
+	printf("pos no archive %ld\n", ftell(arc->arq));
+
 	fwrite(&n_membros, TAM_N_MEMBROS, 1, arc->arq);
 	fwrite(novo_m, TAM_PROPRIEDADES, 1, arc->arq);
 	tam_conteudo = arq_to_buffer(membro_arq, &buffer);
