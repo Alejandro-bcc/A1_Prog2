@@ -5,7 +5,7 @@
 
 struct membro{
 
-    char *nome;
+    char nome[1024];
     unsigned int udi;
     unsigned int tam_orig;
     unsigned int tam_comp;

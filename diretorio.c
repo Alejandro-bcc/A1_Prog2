@@ -79,8 +79,24 @@ int diretorio_insere(struct diretorio *d, struct membro *m){
 	
 	atual = d->prim;
 	while(atual != NULL){
-		if(atual == m)
-			return -1;
+		if(strcmp(m->nome, atual->nome) == 0){
+			if(atual == d->prim){
+				atual->prox->ant = m;
+				d->prim = m;
+				m->prox = atual->prox;
+			}else if(atual == d->ult){
+				atual->ant->prox = m;
+				d->ult = m;
+				m->ant = atual->ant;
+			}else{
+				m->ant = atual->ant;
+				m->prox = atual->prox;
+				atual->prox->ant = m;
+				atual->ant->prox = m;
+			}
+			free(atual);
+			return d->tam;
+		}
 		atual = atual->prox;
 	}
 
