@@ -3,7 +3,7 @@
 
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror -g -std=c99 -g
-OBJS = vina.o archive.o diretorio.o manipulador_arquivos.o
+OBJS = vina.o archive.o diretorio.o manipulador_arquivos.o lz.o
 
 # gera executavel
 all: $(OBJS)
@@ -24,9 +24,12 @@ diretorio.o: diretorio.c diretorio.h
 manipulador_arquivos.o: manipulador_arquivos.c manipulador_arquivos.h
 	$(CC) $(CFLAGS) -c manipulador_arquivos.c
 
+lz.o: lz/lz.c lz/lz.h
+	$(CC) $(CFLAGS) -c lz/lz.c
+
 valgrind: all
 	valgrind --leak-check=full --track-origins=yes ./vina
 
 clean:
-	rm -f *.o *~ vina
+	rm -f *.o *~ vina lz/lz.o
 

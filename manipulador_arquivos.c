@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "manipulador_arquivos.h"
+#include "lz/lz.h"
 
 int tam_arq(FILE *arq){
 	
@@ -75,4 +76,32 @@ int buffer_to_arq(unsigned char *buffer, unsigned int tam_arq, FILE *arq){
     return 0;
 }
 
+int arq_comprime(FILE *arq, unsigned char **buffer_out){
 
+	unsigned char *buffer_in;
+	unsigned int outsize;
+	int tam_orig, tam_comp;
+	
+	if(!arq || !buffer_out)
+		return -1;
+
+	tam_orig = arq_to_buffer(arq, &buffer_in);
+
+	outsize = (tam_orig * 257)/256 + 1;
+	*buffer_out = (unsigned char *)malloc(outsize);
+	if(!*buffer_out){
+		free(buffer_in);
+		return -1;
+	}
+
+	tam_comp = LZ_Compress(buffer_in, *buffer_out, tam_orig);
+
+	if(tam_comp < tam_orig){
+		free(buffer_in);
+		return tam_comp;
+	}else{
+		free(*buffer_out);
+		*buffer_out = buffer_in; // Coloca conteudo original do arquivo no buffer de saida
+		return tam_comp;
+	}
+}

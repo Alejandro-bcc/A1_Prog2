@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "archive.h"
 #include "diretorio.h"
 #include "manipulador_arquivos.h"
+
+#define COMPRIME 1
+#define NAO_COMPRIME 0
 
 void print_error(){
 	
@@ -31,6 +35,7 @@ int main (int argc, char **argv){
 	
 	char opcao;
 	char *archive_nome;
+	char archive_extensao[] = ".vc";
 	struct archive *arc;
 
 	if(argc < 2){
@@ -49,6 +54,12 @@ int main (int argc, char **argv){
 		printf("Insira o nome do archive!\n");	
 		print_error();
 		return 1;
+	}else{
+		if(!strstr(argv[2], archive_extensao)){
+			printf("Insira um archive válido, com extesão .vc!\n");
+			print_error();
+			return 1;
+		}
 	}
 
 	opcao = argv[1][1];
@@ -69,11 +80,12 @@ int main (int argc, char **argv){
 			}
 			for(int i = 3; i < argc; i++){
 				printf("Inserindo %s em %s sem compressão\n", argv[i], archive_nome);
-				if(archive_insere(arc, argv[i]) < 0){
+				if(archive_insere(arc, argv[i], NAO_COMPRIME) < 0){
 					printf("Erro ao inserir! Abortando...\n");
 					return -1;
+				}else{
+					printf("Inserção feita com sucesso!\n");
 				}
-				printf("Inserção feita com sucesso!\n");
 			}
 			break;
 		case 'i':
@@ -86,15 +98,29 @@ int main (int argc, char **argv){
 			}
 			for(int i = 3; i < argc; i++){
 				printf("Inserindo %s em %s com compressão\n", argv[i], archive_nome);
-				if(archive_insere(arc, argv[i]) < 0){
+				if(archive_insere(arc, argv[i], COMPRIME) < 0){
 					printf("Erro ao inserir! Abortando...\n");
 					return -1;
+				}else{
+					printf("Inserção feita com sucesso!\n");
 				}
-				printf("Inserção feita com sucesso!\n");
 			}
 			break;
 		case 'm':
 			printf("Opcao -m:\n");
+			if(argv[3] == NULL){
+				printf("Argumentos insuficientes!\n");
+				print_error();
+				return -1;
+			}
+			printf("Movendo %s para ", argv[3]);
+			if(argv[4] == NULL){
+				printf("o começo do archive.\n");
+			}else{
+				printf("exatamente depois de %s.\n", argv[4]);
+			}
+			if(archive_move(arc, argv[3], argv[4]) < 0)
+				printf("Movimentação feita com sucesso!\n");
 			break;
 		case 'x':
 			printf("Opcao -x:\n");

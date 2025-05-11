@@ -4,6 +4,8 @@
 #include <time.h>
 
 #define MAX_NAME_LEN 1024
+#define TRUE 1
+#define FALSE 0
 
 struct membro_disco{
     
@@ -21,6 +23,7 @@ struct membro_disco{
 struct membro{
 
     struct membro_disco *info;
+	int compresso;
     struct membro *prox;
 	struct membro *ant;
 };
@@ -29,18 +32,24 @@ struct diretorio{
 
     struct membro *prim;
     struct membro *ult;
-    unsigned int tam;
+    int tam;
 };
 
-struct membro * cria_membro(const char *nome);
+struct membro * cria_membro(const char *membro_nome);
 
-struct membro * membro_inicializa(struct membro_disco *info);
+struct membro * inicializa_membro(struct membro_disco *info);
 
 struct diretorio * cria_diretorio();
 
 void destroi_diretorio(struct diretorio *dir);
 
+int busca_membro(struct diretorio *d, const char *membro_nome);
+
+struct membro * acha_membro(struct diretorio *d, const char *membro_nome);
+
 int diretorio_insere(struct diretorio *d, struct membro *m);
+
+int diretorio_move(struct diretorio *d, int pos_membro, int pos_target);
 
 void diretorio_imprime(struct diretorio *d); 
 

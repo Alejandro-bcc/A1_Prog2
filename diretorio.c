@@ -36,6 +36,7 @@ struct membro * cria_membro(const char *membro_nome){
 	}
 
 	novo_m->info = info;
+	novo_m->compresso = FALSE;
 	novo_m->prox = NULL;
 	novo_m->ant = NULL;
 
@@ -43,7 +44,7 @@ struct membro * cria_membro(const char *membro_nome){
 	novo_m->info->udi = st.st_uid;
 	novo_m->info->tam_orig = st.st_size;
 	novo_m->info->tam_comp = 0;
-	novo_m->info->tam_real = 0;
+	novo_m->info->tam_disc = 0;
 	novo_m->info->data_mod = st.st_mtime;
 	novo_m->info->ordem = 0;
 	novo_m->info->offset_ant = 0;
@@ -52,7 +53,7 @@ struct membro * cria_membro(const char *membro_nome){
 	return novo_m;
 }
 
-struct membro * membro_inicializa(struct membro_disco *info){
+struct membro * inicializa_membro(struct membro_disco *info){
 
 	struct membro *m;
 
@@ -103,7 +104,45 @@ void destroi_diretorio(struct diretorio *dir){
 
 	free(dir);
 }
-   
+
+int busca_membro(struct diretorio *d, const char *membro_nome){
+	
+	struct membro *aux;
+	int i;
+
+	if(!d || d->prim == NULL)
+		return -1;
+
+	aux = d->prim;
+	i = 0;
+	while(aux != NULL){
+		if(strcmp(aux->info->nome, membro_nome) == 0)
+			return i;
+		aux = aux->prox;
+		i++;
+	}
+
+	// Percorreu todos os membros e não achou
+	return -1;
+} 
+
+struct membro * acha_membro(struct diretorio *d, const char *membro_nome){
+	
+	struct membro *aux;
+
+	if(!d || !d->prim)
+		return NULL;
+	
+	aux = d->prim;
+	while(aux != NULL){
+		if(strcmp(aux->info->nome, membro_nome))
+			return aux;
+		aux = aux->prox;
+	}
+
+	return aux;
+}
+
 int diretorio_insere(struct diretorio *d, struct membro *m){
 	
 	struct membro *atual;
@@ -153,6 +192,66 @@ int diretorio_insere(struct diretorio *d, struct membro *m){
 	return ++d->tam;
 }
 
+int diretorio_move(struct diretorio *d, int pos_membro, int pos_target){
+	
+	struct membro *membro, *target;
+	int i;
+
+	if(!d || !d->prim || pos_membro < 0 || pos_membro >= d->tam || pos_target >= d->tam)
+		return -1;
+
+	if(pos_membro == pos_target)
+		return 0;
+
+	if(pos_membro == pos_target + 1)
+		return 0;
+
+	// Acha o membro e o target
+	membro = d->prim;
+	for(i = 0; membro != NULL && i < pos_membro; i++)
+		membro = membro->prox;
+	
+	if(pos_target >= 0){
+		target = d->prim;
+		for(i = 0; target != NULL && i < pos_target; i++)
+				target = target->prox;
+	}else{
+		target = NULL;
+	}
+	
+	// Remove o membro da sua posição atual
+	if(membro->ant != NULL){
+		membro->ant->prox = membro->prox;
+	}else{
+		d->prim = membro->prox;
+	}
+	if(membro->prox != NULL){
+		membro->prox->ant = membro->ant;
+	}else{
+		d->ult = membro->ant;
+	}
+
+	if(target == NULL){
+		membro->ant = NULL;
+		membro->prox = d->prim;
+		if(d->prim != NULL)
+			d->prim->ant = membro;
+		d->prim = membro;
+		if(d->ult == NULL)
+			d->ult = membro;
+	}else{
+		membro->ant = target;
+		membro->prox = target->prox;
+		if(target->prox != NULL)
+			target->prox->ant = membro;
+		target->prox = membro;
+		if(d->ult == target)
+			d->ult = membro;
+	}
+	
+	return 0;
+}
+
 void diretorio_imprime(struct diretorio *d){
 	
 	struct membro *aux;
@@ -167,14 +266,17 @@ void diretorio_imprime(struct diretorio *d){
 		tm_info = localtime(&aux->info->data_mod);
         strftime(data_str, sizeof(data_str), "%Y-%m-%d %H:%M:%S", tm_info);
 
-        printf("%-16s\t%-5u\t%-10u\t%-10u\t%-19s\t%-5u\n",
+        printf("%-16s\t%-5u\t%-10u\t%-10u\t%-10u\t%-19s\t%-5u\n",
             	aux->info->nome,
             	aux->info->udi,
             	aux->info->tam_orig,
-            	aux->info->tam_comp,
+				aux->info->tam_comp,
+            	aux->info->tam_disc,
             	data_str,
             	aux->info->ordem
         );
 		aux = aux->prox;
 	}
 }
+
+
