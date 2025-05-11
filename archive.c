@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 
 #include "archive.h"
@@ -7,7 +8,7 @@
 #include "manipulador_arquivos.h"
 
 #define TAM_N_MEMBROS sizeof(int)
-#define TAM_PROPRIEDADES sizeof(struct membro)
+#define TAM_PROPRIEDADES sizeof(struct membro_disco)
 
    
 struct archive * cria_archive(const char *archive_nome){
@@ -15,11 +16,18 @@ struct archive * cria_archive(const char *archive_nome){
 	struct archive *arc;
 
 	arc = (struct archive *)malloc(sizeof(struct archive));
-	arc->arq = fopen(archive_nome, "a+");
-	
-	if(arc->arq == NULL){
-		free(arc);
+	if(arc == NULL)
 		return NULL;
+
+	strcpy(arc->nome, archive_nome);
+
+	arc->arq = fopen(arc->nome, "rb+");
+	if(arc->arq == NULL){
+		arc->arq = fopen(arc->nome, "wb+");
+		if(arc->arq == NULL){
+			free(arc);
+			return NULL;
+		}
 	}
 	
 	arc->dir = cria_diretorio();
@@ -29,7 +37,8 @@ struct archive * cria_archive(const char *archive_nome){
  
 int archive_inicializa(struct archive *arc){
 
-	struct membro atual;
+	struct membro *atual;
+	struct membro_disco *info;
 	int n_membros_inicial = 0;
 
 	if(arc == NULL)
@@ -42,20 +51,33 @@ int archive_inicializa(struct archive *arc){
 		return n_membros_inicial;
 	}
 
-	fread(&n_membros_inicial, TAM_N_MEMBROS, 1, arc->arq);
+	if (fread(&n_membros_inicial, TAM_N_MEMBROS, 1, arc->arq) != 1) {
+        printf("Erro ao ler número de membros.\n");
+        return -1;
+    }
 	if(n_membros_inicial == 0){
 		printf("Archive originalmente vazio!\n");
 		return n_membros_inicial;
 	}
 
-	printf("1: Archive originalmente com %d membros\n", n_membros_inicial);
-
 	for(int i = 0; i < n_membros_inicial; i++){
-		fread(&atual, TAM_PROPRIEDADES, 1, arc->arq);
-		diretorio_insere(arc->dir, &atual);
-	}
+		info = (struct membro_disco *)malloc(sizeof(struct membro_disco));
+		if(!info)
+			return -1;
 
-	printf("2: Archive originalmente com %d membros\n", arc->dir->tam);
+		if(fread(info, TAM_PROPRIEDADES, 1, arc->arq) != 1){
+			free(info);
+			return -1;
+		}
+
+		atual = membro_inicializa(info);
+		if(!atual){
+			free(info);
+			return -1;
+		}
+
+		diretorio_insere(arc->dir, atual);
+	}
 
 	fseek(arc->arq, 0, SEEK_SET);
 	
@@ -65,9 +87,12 @@ int archive_inicializa(struct archive *arc){
 int archive_insere(struct archive *arc, const char *membro_nome){
 	
 	struct membro *novo_m;
+	struct membro *atual;
 	FILE *membro_arq;
+	FILE *temp_arq;
 	unsigned char *buffer;
-	int tam_conteudo, n_membros;
+	int tam_conteudo;
+	unsigned int offset, ordem;
 
 	if(arc == NULL || membro_nome == NULL)
 		return -1;
@@ -81,28 +106,78 @@ int archive_insere(struct archive *arc, const char *membro_nome){
 		fclose(membro_arq);
 		return -1;
 	}
+	
+	// Calcula ordem de inserção para o novo membro
+	if(!arc->dir->ult){
+		// Archive vazio, ordem 1
+		ordem = 1;
+	}else{
+		// Archive não vazio, ordem do ultimo membro + 1
+		ordem = arc->dir->ult->info->ordem + 1;
+	}
+	novo_m->info->ordem = ordem;
 
-	n_membros = diretorio_insere(arc->dir, novo_m);
+	// Insere o novo membro no diretorio
+	diretorio_insere(arc->dir, novo_m);
 
-	printf("numero de membros apos inserção: %d\n", n_membros);
-	fseek(arc->arq, 0, SEEK_SET);	
-	printf("pos no archive %ld\n", ftell(arc->arq));
+	// Atualiza o offset de todos os membros apos a inserção
+	offset = TAM_N_MEMBROS + (TAM_PROPRIEDADES * arc->dir->tam);
+	atual = arc->dir->prim;
+	while(atual != NULL){
+		atual->info->offset_ant = atual->info->offset;
+		atual->info->offset = offset;
+		offset += atual->info->tam_orig;
+		atual = atual->prox;
+	}
 
-	fwrite(&n_membros, TAM_N_MEMBROS, 1, arc->arq);
-	fwrite(novo_m, TAM_PROPRIEDADES, 1, arc->arq);
-	tam_conteudo = arq_to_buffer(membro_arq, &buffer);
-	fseek(arc->arq, 0 , SEEK_END);
-	fwrite(buffer, tam_conteudo, 1, arc->arq);
-	fseek(arc->arq, 0, SEEK_SET);
+	// Escreve o espaço do diretorio do archive atualizado num arquivo temporário
+	temp_arq = fopen("temp", "wb+");
+	if(temp_arq == NULL){
+		fclose(membro_arq);
+		return -1;
+	}
+	fseek(temp_arq, 0, SEEK_SET);
+	fwrite(&arc->dir->tam, TAM_N_MEMBROS, 1, temp_arq);
+	atual = arc->dir->prim;
+	while(atual != NULL){
+		fwrite(atual->info, TAM_PROPRIEDADES, 1, temp_arq);
+		atual = atual->prox;
+	}
 
-	free(buffer);
+	// Escreve o conteudo dos membros no arquivo temporario
+	atual = arc->dir->prim;
+	while(atual != NULL){
+		if(strcmp(atual->info->nome, novo_m->info->nome) == 0){
+			// Novo membro, le do arquivo original
+			fseek(membro_arq, 0, SEEK_SET);
+			tam_conteudo = arq_to_buffer(membro_arq, &buffer);
+			fwrite(buffer, tam_conteudo, 1, temp_arq);
+			free(buffer);
+		}else{
+			// Membro já existente, le do archive original usando o offset antigo
+			buffer = malloc(atual->info->tam_orig);
+			fseek(arc->arq, atual->info->offset_ant, SEEK_SET);
+			fread(buffer, atual->info->tam_orig, 1, arc->arq);
+			fwrite(buffer, atual->info->tam_orig, 1, temp_arq);
+			free(buffer);
+		}
+		atual = atual->prox;
+	}
+
 	fclose(membro_arq);
+	fclose(temp_arq);
+	fclose(arc->arq);
+
+	remove(arc->nome);
+	rename("temp", arc->nome); 
+
+	arc->arq = fopen(arc->nome, "rb+");
+
+	//Sucesso, retorna 0
 	return 0;
 }
 
 int archive_print_cont(struct archive *arc){
-
-	unsigned int n_membros;
 
 	if(arc == NULL)
 		return -1;
@@ -112,15 +187,10 @@ int archive_print_cont(struct archive *arc){
 		return -1;
 	}
 
-	fread(&n_membros, TAM_N_MEMBROS, 1, arc->arq);
-	if(n_membros <= 0)
-		return n_membros;
-	
-	if(n_membros != arc->dir->tam)
-		return -1;
-	
+	printf("%-16s\t%-5s\t%-10s\t%-10s\t%-19s\t%-5s\n",
+    		"Nome", "UDI", "Tam. Orig.", "Tam. Disc.", "Data Mod.", "Ordem");
 	diretorio_imprime(arc->dir);
 
-	return n_membros;
+	return 0;
 }
 

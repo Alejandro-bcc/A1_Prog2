@@ -5,6 +5,7 @@
 
 struct archive{
 	
+	char nome[MAX_NAME_LEN];
 	FILE *arq;
 	struct diretorio *dir;
 };
