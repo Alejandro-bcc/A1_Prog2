@@ -24,7 +24,7 @@
   - **Remoção:** O membro é removido da lista e o arquivo archive é reescrito sem o conteúdo do membro removido.
   - **Movimentação:** O membro é removido de sua posição e inserido após o membro target, com atualização das ordens e offsets.
   - **Extração:** O conteúdo do membro é lido do archive e escrito em disco, descomprimindo se necessário.
-  - **Compressão:** Utiliza o algoritmo LZ77 (implementação própria em `lz/`).
+  - **Compressão:** Utiliza o algoritmo LZ77.
 - **Alternativas Consideradas:**
   - Considerou-se o uso de arrays dinâmicos para o diretório, mas a lista duplamente encadeada foi escolhida pela facilidade de remoção e movimentação de membros.
   - Para compressão, optou-se por uma implementação simples de LZ77, já que era requisito do trabalho.
