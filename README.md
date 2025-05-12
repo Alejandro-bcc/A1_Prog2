@@ -6,7 +6,7 @@
 
 ## Arquivos e Diretórios
 
-- `vina.c` — Arquivo principal do programa, responsável pelo parsing dos argumentos e chamada das operações.
+- `vina.c` — Arquivo principal do programa, responsável pela passagem dos argumentos e chamada das operações.
 - `archive.c` / `archive.h` — Implementação e interface das operações sobre o arquivo compactado (archive), incluindo inserção, remoção, extração, movimentação e listagem de membros.
 - `diretorio.c` / `diretorio.h` — Implementação e interface das estruturas de diretório e membro, além das funções de manipulação da lista duplamente encadeada de membros.
 - `manipulador_arquivos.c` / `manipulador_arquivos.h` — Funções utilitárias para manipulação de arquivos, buffers e compressão/descompressão.
