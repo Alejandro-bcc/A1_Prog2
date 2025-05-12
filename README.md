@@ -28,16 +28,10 @@
 - **Alternativas de implemetação:**
     - Foi considerado realizar deslocamentos de metadados e conteúdos dos membros no archive original ao realizar a inserção, remoção e movimentação dos mesmos, porém, optou-se uso de arquivos temporários para implementar estas operações e não perder os metadados e conteúdo originais.
 - **Dificuldades e Soluções:**
-  - Gerenciamento correto de ponteiros e memória ao manipular a lista duplamente encadeada, especialmente ao substituir ou remover membros.
-  - Garantir que os offsets e tamanhos fossem atualizados corretamente após cada operação.
-  - Evitar vazamentos de memória e erros de leitura/gravação, especialmente ao manipular arquivos binários.
-  - Corrigir bugs relacionados à leitura e escrita de tamanhos incorretos, que causavam duplicação ou truncamento de dados extraídos.
+  - Garantir que os offsets e tamanhos fossem atualizados corretamente após cada operação. Isto foi garantido adicionando um atributo à estrutura do membro_disco para salvar o offset anterior à operação atual, permitindo recuperar os conteúdos do archive original.
+  - Corrigir bugs relacionados à leitura e escrita de tamanhos incorretos, que causavam duplicação ou truncamento de dados extraídos. Para solucionar isto, decidiu-se adicinar um outro atributo ao membro_disc chamado tam_disc, que armezena o tamanho em disco real (independentemente de se o membro está comprimido ou não).
 
 ## Bugs Conhecidos
 
-- Em casos de falha de energia ou interrupção durante a escrita do arquivo temporário, o archive pode ser corrompido.
-- Não há verificação de integridade dos dados comprimidos/descomprimidos.
-- O programa não trata nomes de arquivos com mais de 1023 caracteres.
-- O uso de arquivos temporários pode causar problemas se múltiplas instâncias do programa forem executadas simultaneamente no mesmo diretório.
-- Mensagens de erro podem ser pouco detalhadas em alguns casos de falha de I/O.
-
+- Membros que são comprimidos ficam corrompidos ao ser extraidos.
+- Membros inseridos a partir de um caminho (absoluto ou relativo) ficam com o nome do caminho e ao serem extraidos isso ocorre nesse caminho.
