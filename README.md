@@ -13,7 +13,6 @@
 - `lz/` — Diretório contendo a implementação do algoritmo de compressão LZ77 (`lz.c`, `lz.h`).
 - `makefile` — Script para compilação do projeto.
 - `README.md` — Este arquivo.
-- Outros arquivos de teste, como arquivos `.txt` para inserção no archive.
 
 ## Algoritmos e Estruturas de Dados
 
