@@ -22,7 +22,7 @@
 - **Algoritmos:**
   - **Inserção:** O membro é inserido ao final da lista (ou substitui um existente), e os offsets são recalculados. O arquivo archive é reescrito usando um arquivo temporário.
   - **Remoção:** O membro é removido da lista e o arquivo archive é reescrito sem o conteúdo do membro removido.
-  - **Movimentação:** O membro é removido de sua posição e inserido após o membro alvo, com atualização das ordens e offsets.
+  - **Movimentação:** O membro é removido de sua posição e inserido após o membro target, com atualização das ordens e offsets.
   - **Extração:** O conteúdo do membro é lido do archive e escrito em disco, descomprimindo se necessário.
   - **Compressão:** Utiliza o algoritmo LZ77 (implementação própria em `lz/`).
 - **Alternativas Consideradas:**
