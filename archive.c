@@ -90,10 +90,9 @@ int archive_insere(struct archive *arc, const char *membro_nome, int comprime){
 	struct membro *atual;
 	FILE *membro_arq;
 	FILE *temp_arq;
-	unsigned char *buffer;
-	unsigned char *buffer_ant;
+	unsigned char *buffer, *buffer_ant;
 	int tam_conteudo;
-	unsigned int offset, ordem;
+	unsigned int offset;
 
 	if(arc == NULL || membro_nome == NULL)
 		return -1;
@@ -107,7 +106,8 @@ int archive_insere(struct archive *arc, const char *membro_nome, int comprime){
 		fclose(membro_arq);
 		return -1;
 	}
-
+	
+	// Pega o conteudo e tamanho do novo membro, compresso ou não
 	fseek(membro_arq, 0, SEEK_SET);
 	if(comprime){
 		tam_conteudo = arq_comprime(membro_arq, &buffer);
@@ -123,16 +123,6 @@ int archive_insere(struct archive *arc, const char *membro_nome, int comprime){
 		novo_m->compresso = FALSE;
 	}
 	novo_m->info->tam_disc = tam_conteudo;
-
-	// Calcula ordem de inserção para o novo membro
-	if(!arc->dir->ult){
-		// Archive vazio, ordem 1
-		ordem = 1;
-	}else{
-		// Archive não vazio, ordem do ultimo membro + 1
-		ordem = arc->dir->ult->info->ordem + 1;
-	}
-	novo_m->info->ordem = ordem;
 
 	// Insere o novo membro no diretorio
 	diretorio_insere(arc->dir, novo_m);
@@ -193,9 +183,82 @@ int archive_insere(struct archive *arc, const char *membro_nome, int comprime){
 	return 0;
 }
 
+int archive_remove(struct archive *arc, const char *membro_nome){
+	
+	struct membro *atual;
+	FILE *temp_arq;
+	unsigned char *buffer;
+	unsigned int offset;
+	int zero = 0;
+
+	if(!arc)
+		return -1;
+
+	if((busca_membro(arc->dir, membro_nome)) < 0)
+		return -1;
+
+	// Antes de remover o membro do diretorio salva o offset de todos os membros
+	atual = arc->dir->prim;
+	while(atual != NULL){	
+		atual->info->offset_ant = atual->info->offset;
+		atual = atual->prox;
+	}
+
+	diretorio_remove(arc->dir, membro_nome);
+	
+	if(arc->dir->tam == 0){
+		fclose(arc->arq);
+		arc->arq = fopen(arc->nome, "wb+");
+		fwrite(&zero, TAM_N_MEMBROS, 1, arc->arq);
+		return 0;
+	}
+
+	// Atualiza o offset de todos os membros
+	offset = TAM_N_MEMBROS + (TAM_PROPRIEDADES * arc->dir->tam);
+	atual = arc->dir->prim;
+	while(atual != NULL){	
+		atual->info->offset = offset;
+		offset += atual->info->tam_disc;
+		atual = atual->prox;
+	}
+
+	// Escreve o diretorio atualizado do archive no arquivo temporario
+	temp_arq = fopen("temp", "wb+");
+	if(!temp_arq)
+		return -1;
+
+	fwrite(&arc->dir->tam, TAM_N_MEMBROS, 1, temp_arq);
+	atual = arc->dir->prim;
+	while(atual != NULL){
+		fwrite(atual->info, TAM_PROPRIEDADES, 1, temp_arq);
+		atual = atual->prox;
+	}
+
+	// Escreve o conteudo dos membros na nova ordem
+	atual = arc->dir->prim;
+	while(atual != NULL){
+		buffer = malloc(atual->info->tam_disc);
+		fseek(arc->arq, atual->info->offset_ant, SEEK_SET);
+		fread(buffer, atual->info->tam_disc, 1, arc->arq);
+		fwrite(buffer, atual->info->tam_disc, 1, temp_arq);
+		free(buffer);
+		atual = atual->prox;
+	}
+
+	fclose(temp_arq);
+	fclose(arc->arq);
+
+	remove(arc->nome);
+	rename("temp", arc->nome);
+
+	arc->arq = fopen(arc->nome, "rb+");
+
+	return 0;
+}
+
 int archive_move(struct archive *arc, const char *membro_nome, const char *target_nome){
 	
-	struct membro *atual, *membro, *target;
+	struct membro *atual;
 	FILE *temp_arq;
 	int pos_membro, pos_target;
 	unsigned char *buffer;
@@ -218,20 +281,6 @@ int archive_move(struct archive *arc, const char *membro_nome, const char *targe
 	
 	diretorio_move(arc->dir, pos_membro, pos_target);
 
-	// Atualiza a ordem do membros
-	membro = acha_membro(arc->dir, membro_nome);
-	if(target_nome != NULL){
-		target = acha_membro(arc->dir, target_nome);
-		membro->info->ordem = target->info->ordem + 1;
-	}else{
-		membro->info->ordem = 1;
-	}
-	atual = membro;
-	while(atual->prox != NULL){
-		atual->prox->info->ordem = atual->info->ordem + 1;
-		atual = atual->prox;
-	}
-
 	// Atualiza o offset de todos os membros
 	offset = TAM_N_MEMBROS + (TAM_PROPRIEDADES * arc->dir->tam);
 	atual = arc->dir->prim;
@@ -242,7 +291,7 @@ int archive_move(struct archive *arc, const char *membro_nome, const char *targe
 		atual = atual->prox;
 	}
 
-    // Escreve o diretorio atualizado no archivo temporario
+    // Escreve o diretorio atualizado do archive no arquivo temporario
     temp_arq = fopen("temp", "wb+");
     if (!temp_arq)
         return -1;
@@ -275,6 +324,77 @@ int archive_move(struct archive *arc, const char *membro_nome, const char *targe
 
     return 0;
 }
+
+int archive_extrai(struct archive *arc, const char *membro_nome){
+	
+	struct membro *m;
+	unsigned char *buffer;
+
+	if(!arc)
+		return -1;
+	
+	m = acha_membro(arc->dir, membro_nome);
+	if(!m)
+		return -1;
+	/*   *
+	fseek(arc->arq, m->info->offset, SEEK_SET);
+
+	if(m->compresso){
+		buffer = malloc(m->info->tam_comp);
+		fread(buffer, 1, m->info->tam_comp, arc->arq);
+		arq_descomprime(buffer, m->info->tam_comp, m->info->tam_orig, m->info->nome);
+	}else{
+		buffer = malloc(m->info->tam_orig);
+		buffer_to_arq(buffer, m->info->tam_orig, m->info->nome);
+		fread(buffer, 1, m->info->tam_orig, arc->arq);
+	}
+
+	free(buffer);  */
+
+    if(m->compresso){
+        // Read compressed data
+        buffer = malloc(m->info->tam_comp);
+        if (!buffer) return -1;
+        fseek(arc->arq, m->info->offset, SEEK_SET);
+        if (fread(buffer, 1, m->info->tam_comp, arc->arq) != m->info->tam_comp) {
+            free(buffer);
+            return -1;
+        }
+        // Decompress and write exactly tam_orig bytes
+        arq_descomprime(buffer, m->info->tam_comp, m->info->tam_orig, m->info->nome);
+        free(buffer);
+    } else {
+        // Read uncompressed data
+        buffer = malloc(m->info->tam_orig);
+        if (!buffer) return -1;
+        fseek(arc->arq, m->info->offset, SEEK_SET);
+        if (fread(buffer, 1, m->info->tam_orig, arc->arq) != m->info->tam_orig) {
+            free(buffer);
+            return -1;
+        }
+        // Write exactly tam_orig bytes
+        buffer_to_arq(buffer, m->info->tam_orig, m->info->nome);
+        free(buffer);
+    }
+	return 0;
+}
+
+int archive_extrai_todos(struct archive *arc){
+	
+	struct membro *atual;
+
+	if(!arc || arc->dir->tam == 0)
+		return -1;
+
+	atual = arc->dir->prim;
+	while(atual != NULL){
+		archive_extrai(arc, atual->info->nome);
+		atual = atual->prox;
+	}
+
+	return 0;
+}
+
 int archive_print_cont(struct archive *arc){
 
 	if(arc == NULL)

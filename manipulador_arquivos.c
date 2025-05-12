@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "manipulador_arquivos.h"
 #include "lz/lz.h"
@@ -62,16 +63,22 @@ int arq_to_buffer(FILE *arq, unsigned char **buffer){
 	return tam_arq;
 }
 
-int buffer_to_arq(unsigned char *buffer, unsigned int tam_arq, FILE *arq){
+int buffer_to_arq(unsigned char *buffer, unsigned int tam, const char *arq_nome){
 
-    if(buffer == NULL || arq == NULL)
-        return -1;
+	FILE *arq;
 
-    if(tam_arq == 0)
+    if(!buffer || !arq_nome || tam == 0){
         return -1;
+	}
 
-    if((fwrite(buffer, 1, tam_arq, arq)) != tam_arq)
+	arq = fopen(arq_nome, "wb+");
+	if(!arq)
+		return -1;
+
+    if((fwrite(buffer, 1, tam, arq)) != tam){
+		fclose(arq);
         return -1;
+	}
 
     return 0;
 }
@@ -104,4 +111,25 @@ int arq_comprime(FILE *arq, unsigned char **buffer_out){
 		*buffer_out = buffer_in; // Coloca conteudo original do arquivo no buffer de saida
 		return tam_comp;
 	}
+}
+
+int arq_descomprime(unsigned char *arq_cont, unsigned int tam_orig, unsigned int tam_comp, const char *arq_nome){
+	
+	FILE *arq;
+	unsigned char *buffer_out;
+
+	if(!arq_cont || !arq_nome || tam_orig <= 0 || tam_comp <= 0)
+		return -1;
+	
+	arq = fopen(arq_nome, "wb+");
+	if(!arq)
+		return -1;
+	
+	buffer_out = malloc(tam_orig);
+	LZ_Uncompress(arq_cont, buffer_out, tam_comp);
+	buffer_to_arq(buffer_out, tam_orig, arq_nome);
+
+	free(buffer_out);
+	
+	return 0;
 }

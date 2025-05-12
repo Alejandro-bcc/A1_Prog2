@@ -124,9 +124,37 @@ int main (int argc, char **argv){
 			break;
 		case 'x':
 			printf("Opcao -x:\n");
+			if(argv[3] != NULL){
+				for(int i = 3; i < argc; i++){
+					printf("Extraindo %s do archive.\n", argv[i]);
+					if(archive_extrai(arc, argv[i]) < 0){
+						printf("Erro ao tentar extrair o membro. Abortando...\n");
+						return -1;
+					}else{
+						printf("Membro extraido com sucesso.\n");
+					}
+				}
+			}else{
+				printf("Extraindo todos os membros do archive.\n");
+				archive_extrai_todos(arc);
+			}
 			break;
 		case 'r':
 			printf("Opcao -r:\n");
+			if(argv[3] == NULL){
+				printf("Argumentos insuficientes!\n");
+				print_error();
+				return -1;
+			}
+			for(int i = 3; i < argc; i++){
+				printf("Removendo %s do archive.\n", argv[i]);	
+				if(archive_remove(arc, argv[i]) < 0){
+					printf("Erro ao remover! Abortando...\n");
+					return -1;
+				}else{
+					printf("Remoção feita com sucesso!\n");
+				}
+			}
 			break;
 		case 'c':
 			printf("Opcao -c:\nListando conteúdo do archive:\n");

@@ -32,7 +32,7 @@ struct diretorio{
 
     struct membro *prim;
     struct membro *ult;
-    int tam;
+    unsigned int tam;
 };
 
 struct membro * cria_membro(const char *membro_nome);
@@ -48,6 +48,8 @@ int busca_membro(struct diretorio *d, const char *membro_nome);
 struct membro * acha_membro(struct diretorio *d, const char *membro_nome);
 
 int diretorio_insere(struct diretorio *d, struct membro *m);
+
+int diretorio_remove(struct diretorio *d, const char *membro_nome);
 
 int diretorio_move(struct diretorio *d, int pos_membro, int pos_target);
 

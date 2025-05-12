@@ -22,5 +22,7 @@ int archive_extrai(struct archive *arc, const char *membro_nome);
 
 int archive_remove(struct archive *arc, const char *membro_nome);
 
+int archive_extrai_todos(struct archive *arc);
+
 int archive_print_cont(struct archive *arc);
 #endif
