@@ -18,7 +18,7 @@
 
 - **Estruturas de Dados:**
   - Lista duplamente encadeada para o diretório de membros (`struct diretorio` e `struct membro`), permitindo inserção, remoção e movimentação eficiente dos membros.
-  - Cada membro armazena metadados em uma struct (`struct membro_disco`), incluindo nome, UID, tamanhos, datas e offsets.
+  - Cada membro armazena metadados em uma struct (`struct membro_disco`), incluindo nome, UID, tamanhos, datas de modifição e offsets.
 - **Algoritmos:**
   - **Inserção:** O membro é inserido ao final da lista (ou substitui um existente), e os offsets são recalculados. O arquivo archive é reescrito usando um arquivo temporário.
   - **Remoção:** O membro é removido da lista e o arquivo archive é reescrito sem o conteúdo do membro removido.
